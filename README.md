@@ -1,47 +1,56 @@
 # FilmNegativePreview 🎞️
 
-**FilmNegativePreview** 是一款基于 Android 的实时底片扫描预览工具。利用 OpenCV 进行高性能图像处理，结合 CameraX 灵活的相机控制，帮助摄影师即时预览负片的正片效果。
+**FilmNegativePreview** 是一款专为摄影师打造的高性能、专业级实时底片扫描预览工具。通过深度整合 **OpenCV** 图像引擎与 **CameraX** 相机架构，本应用能将您的手机瞬间转变为一台高清底片扫描仪。
 
-## ✨ 功能特性
+## ✨ 核心功能特性
 
-- **实时图像反转**：毫秒级实时反转底片色彩。
-- **色罩手动采样 (Manual Mask Sampling)**：长按屏幕任意位置，精准提取底片片基颜色，消除色偏。
-- **胶片风格模拟 (Film Stocks)**：内置多种经典胶片预设（如 Kodak Portra, Fuji Pro 400H 等）。
-- **专业参数调节**：
-    - **EV (曝光补偿)**：滑动调节画面亮度 (-3.0 至 +3.0)。
-    - **TEMP (色温控制)**：支持手动调节 (3000K-11000K) 或 开启 **AUTO** 自动估算。
-- **灵活的分辨率**：支持从 SD 到 4K (UHD) 以及设备原生最大分辨率切换。
-- **多摄像头支持**：一键切换背部不同的摄像头（广角/主摄）。
-- **现代 UI 设计**：完全基于 Jetpack Compose 构建，交互流畅。
+### 🚀 极致性能
+- **60fps 丝滑预览**：通过 Camera2Interop 强制请求高帧率流，提供无延迟的视觉反馈。
+- **多线程处理**：基于设备 CPU 核心数动态配置线程池，确保 4K 分辨率下的实时反色处理依然流畅。
 
-## 🛠️ 技术实现
+### 🎨 专业色彩处理
+- **工业级去色罩算法**：内置“各通道自动拉伸”与“精确颜色采样”双引擎，完美消除彩色负片厚重的橙色片基。
+- **手动采样校准**：**长按**屏幕底片边缘或齿孔处，即可完成最精准的白平衡归一化校准。
+- **三大预览模式**：
+    - **COLOR**：色彩丰富、层次分明的彩色负片预览。
+    - **BLACK & WHITE**：高对比度黑白银盐质感预览。
+    - **NORMAL VIEW**：一键切换回正常取景器，方便观察环境。
 
-- **核心框架**: Jetpack Compose (UI), CameraX (Camera Interface)
-- **图像处理**: OpenCV (用于色彩矩阵运算与色罩消除)
-- **语言**: Kotlin + Coroutines
-- **编译器配置**: Java 11 (VERSION_11), Compose BOM 2024.09.00
+### ⚙️ 深度硬件适配
+- **多后置镜头切换**：支持在主摄、长焦、超广角等**物理镜头**间真实循环切换，完美适配三星 S23 Ultra、小米 13 等多摄旗舰。
+- **极限分辨率支持**：提供从 SD 到 **4K (UHD)** 以及 **Native Max (硬件最高像素)** 的自由切换。
+- **多机型兼容性加固**：针对小米、OPPO 等机型进行了管线优化，解决了常见的黑屏、转圈及卡死问题。
 
-## 🚀 快速构建
+### 📱 现代化 UI 交互
+- **物理级绝对对称**：侧边控制条采用 50% 屏高设计，中心轴线绝对齐平，带来平衡的专业视觉。
+- **人体工学控制**：
+    - **左侧 EV**：±3.0 曝光补偿控制。
+    - **右侧 Kelvin**：2000K - 10000K 精确色温调节。
+    - **悬浮 AUTO**：单手可达的自动色温切换按钮。
+- **最大化预览空间**：底部菜单支持一键折叠，折叠后背景全透明，画面直达屏幕底边缘。
+
+## 🛠️ 技术栈
+- **UI**: Jetpack Compose (Modern Declarative UI)
+- **Engine**: OpenCV for Android (C++ Optimized)
+- **Camera**: CameraX + Camera2 Interop
+- **Concurrency**: Kotlin Coroutines + Fixed Thread Pool
+
+## 🚀 快速开始
 
 ### 环境要求
+- Android Studio Ladybug 或更高版本
+- JDK 17+ (项目已优化编译器配置)
+- 支持 Camera2 API 的 Android 设备 (推荐旗舰机型以获得 4K+60fps 体验)
 
-- Android Studio Giraffe (2022.3.1) 或更高
-- JDK 11 (项目已配置 `sourceCompatibility = VERSION_11`)
-- Android 设备 (API 26+)
+### 构建与运行
+1. `git clone https://github.com/YourUsername/FilmNegativePreview.git`
+2. 点击 **Sync Project with Gradle Files**（会自动配置 OpenCV 与 Material Icons 扩展库）。
+3. 确保已连接手机并开启 USB 调试，点击 **Run**。
 
-### 运行
-
-1. 克隆项目：
-   bash git clone https://github.com/你的用户名/FilmNegativePreview.git 2. 在 Android Studio 中打开项目。
-2. 等待 Gradle 同步完成（会自动下载 OpenCV 依赖）。
-3. 连接设备并点击 `Run`。
-
-## 📖 使用技巧
-
-1. **采样色罩**：将底片空白处（片基）对准相机，**长按**该区域，App 会记住此颜色并作为补偿基准。
-2. **重置色罩**：点击顶部出现的红色刷新图标即可重置采样。
-3. **锁定自动色温**：点击 TEMP 上方的圆形按钮可开启自动色温估算，再次点击切换回手动控制。
+## 📖 进阶使用技巧
+1. **去色罩**：将底片边缘的橙色区域置于画面中，**长按**该处，画面将瞬间变得通透自然。
+2. **重置**：若采样位置有误，点击顶部的**红色刷新按钮**即可恢复自动去色罩。
+3. **折叠菜单**：点击底部的 **v** 箭头隐藏按钮，专注于观察底片的亮部与暗部细节。
 
 ## 📄 开源协议
-
 本项目采用 [MIT License](LICENSE) 协议。
