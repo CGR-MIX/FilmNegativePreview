@@ -8,10 +8,9 @@ import org.opencv.imgproc.Imgproc
 class ImageProcessor {
 
     enum class FilmStock(val displayName: String, val rGain: Double, val gGain: Double, val bGain: Double) {
-        KODAK_PORTRA("Kodak Portra", 1.2, 1.1, 0.8),
-        FUJI_PRO400H("Fuji Pro 400H", 0.8, 1.2, 1.1),
-        FOMA_100("Foma 100 (B&W)", 1.0, 1.0, 1.0),
-        KODAK_GOLD("Kodak Gold", 1.3, 1.0, 0.7)
+        COLOR("Color", 1.0, 1.0, 1.0),
+        BW("Black & White", 1.0, 1.0, 1.0),
+        NORMAL("Normal View", 1.0, 1.0, 1.0) // 新增：正常取景模式
     }
 
     private fun removeColorMask(src: Mat, manualMaskColor: Scalar? = null) {
@@ -19,14 +18,11 @@ class ImageProcessor {
         Core.split(src, channels)
 
         if (manualMaskColor != null) {
-            // 使用手动采样的色罩颜色进行归一化
-            // pixel = pixel / maskColor * 255
             for (i in 0..2) {
                 val maskVal = manualMaskColor.`val`[i].coerceAtLeast(1.0)
                 channels[i].convertTo(channels[i], -1, 255.0 / maskVal, 0.0)
             }
         } else {
-            // 自动直方图拉伸去色罩
             for (i in 0..2) {
                 val res = Core.minMaxLoc(channels[i])
                 val minVal = res.minVal
@@ -73,6 +69,7 @@ class ImageProcessor {
         val src = Mat()
         Utils.bitmapToMat(bitmap, src)
 
+        // 1. 物理旋转
         when (rotation) {
             90 -> Core.rotate(src, src, Core.ROTATE_90_CLOCKWISE)
             180 -> Core.rotate(src, src, Core.ROTATE_180)
@@ -81,17 +78,21 @@ class ImageProcessor {
 
         Imgproc.cvtColor(src, src, Imgproc.COLOR_RGBA2RGB)
 
-        // 执行去色罩
-        removeColorMask(src, manualMaskColor)
+        // 如果是正常取景模式，跳过底片处理逻辑
+        if (stock == FilmStock.NORMAL) {
+            val resultBitmap = Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.ARGB_8888)
+            Utils.matToBitmap(src, resultBitmap)
+            src.release()
+            return resultBitmap
+        }
 
-        // 底片反转
+        // --- 以下为底片处理逻辑 ---
+        removeColorMask(src, manualMaskColor)
         Core.bitwise_not(src, src)
 
-        // 曝光补偿
         val exposureFactor = Math.pow(2.0, exposure.toDouble())
         src.convertTo(src, -1, exposureFactor, 0.0)
 
-        // 色温 & 胶片模拟
         val channels = mutableListOf<Mat>()
         Core.split(src, channels)
         
@@ -104,12 +105,11 @@ class ImageProcessor {
 
         Core.merge(channels, src)
 
-        if (stock == FilmStock.FOMA_100) {
+        if (stock == FilmStock.BW) {
             Imgproc.cvtColor(src, src, Imgproc.COLOR_RGB2GRAY)
             Imgproc.cvtColor(src, src, Imgproc.COLOR_GRAY2RGB)
         }
 
-        // Gamma 校正
         src.convertTo(src, -1, 1.1, 10.0)
 
         val resultBitmap = Bitmap.createBitmap(src.cols(), src.rows(), Bitmap.Config.ARGB_8888)
