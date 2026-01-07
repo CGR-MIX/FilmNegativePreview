@@ -16,11 +16,17 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // 关键优化：只保留主流手机使用的 arm64-v8a 架构，可大幅减少约 60%-70% 的体积
+        ndk {
+            abiFilters.add("arm64-v8a")
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true // 开启混淆压缩
+            isShrinkResources = true // 开启资源压缩
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -37,6 +43,12 @@ android {
     buildFeatures {
         compose = true
     }
+    
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 dependencies {
@@ -48,11 +60,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    // 增加 Material 扩展图标库，以支持 Cameraswitch 图标
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.appcompat:appcompat:1.6.1")
     
-    // CameraX 依赖
     val camerax_version = "1.3.0"
     implementation("androidx.camera:camera-core:${camerax_version}")
     implementation("androidx.camera:camera-camera2:${camerax_version}")
@@ -68,5 +78,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     
     implementation("com.quickbirdstudios:opencv:4.5.3.0")
-    implementation("org.tensorflow:tensorflow-lite:2.14.0")
 }
